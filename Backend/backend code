@@ -2,6 +2,8 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const bodyParser = require("body-parser");
+const axios = require("axios");
+const schedule = require("node-schedule");  // Import node-schedule for cron jobs
 
 const app = express();
 const PORT = 3000;
@@ -17,7 +19,7 @@ mongoose.connect("mongodb://localhost:27017/seatbooking", {
 
 // Models
 const User = mongoose.model("User", new mongoose.Schema({ email: String, password: String }));
-const Seat = mongoose.model("Seat", new mongoose.Schema({ id: Number, available: Boolean }));
+const Seat = mongoose.model("Seat", new mongoose.Schema({ id: Number, available: Boolean, bookingTime: Date }));
 
 // Prepopulate Database (Run once)
 async function initializeDatabase() {
@@ -29,7 +31,7 @@ async function initializeDatabase() {
   const seatCount = await Seat.countDocuments();
   if (seatCount === 0) {
     for (let i = 1; i <= 20; i++) {
-      await Seat.create({ id: i, available: i % 3 !== 0 }); // Every 3rd seat is booked
+      await Seat.create({ id: i, available: i % 3 !== 0, bookingTime: null }); // Every 3rd seat is booked
     }
   }
 }
@@ -53,8 +55,46 @@ app.post("/api/seats/book/:id", async (req, res) => {
     return res.status(400).json({ message: "Seat not available" });
   }
   seat.available = false;
+  seat.bookingTime = new Date();  // Store booking time
   await seat.save();
+
+  // Schedule task to automatically release the seat if no check-in within 15 minutes
+  schedule.scheduleJob(new Date(Date.now() + 15 * 60 * 1000), async function() {
+    const seatToRelease = await Seat.findOne({ id: req.params.id });
+    if (seatToRelease && !seatToRelease.available) {
+      seatToRelease.available = true; // Release the seat
+      seatToRelease.bookingTime = null; // Clear the booking time
+      await seatToRelease.save();
+      console.log(`Seat ${req.params.id} was not checked in and has been released.`);
+    }
+  });
+
   res.json({ message: "Seat booked successfully!" });
+});
+
+// New Endpoint for RFID Check-in (Triggered by Raspberry Pi)
+app.post("/api/rfid/checkin", async (req, res) => {
+  const { rfidId } = req.body; // The RFID card ID scanned by Raspberry Pi
+
+  // You can use this to identify which seat the student has booked
+  const seat = await Seat.findOne({ id: 1 }); // Example: Use seat ID 1, modify as needed
+
+  if (seat && seat.bookingTime) {
+    const currentTime = new Date();
+    const bookingTime = seat.bookingTime;
+    const timeDiff = currentTime - bookingTime; // Difference in milliseconds
+
+    if (timeDiff <= 15 * 60 * 1000) {
+      seat.available = false; // Mark seat as booked
+      seat.bookingTime = null; // Clear booking time
+      await seat.save();
+      res.json({ message: "RFID Check-in successful, seat booked!" });
+    } else {
+      res.status(400).json({ message: "Booking expired, seat released!" });
+    }
+  } else {
+    res.status(400).json({ message: "Seat already booked or unavailable." });
+  }
 });
 
 // Start Server
