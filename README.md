@@ -23,17 +23,19 @@ Students book a seat via a React Native mobile app, selecting a time slot first,
 
 * **WIFI Rooter** – For check-in devices to the backend server
 
+* **Raspberry Pi** – For connects to RFID reader for processing check-in data
+
 
 ### Software
 * **React Native** – For User Interface design
 
 * **WebSocket** – Real-time seat updates
 
-* **Raspberry Pi** – For connects to RFID reader for processing check-in data
-
 * **Node.js** - Handles API requests and responses.
 
 * **Rest API** - handle user authentication, manage seat reservations, and facilitate communication between the frontend and backend.
+
+* **Cron** - Cancel the reservation If no check-in after 15 minutes by RFID Reader
 
 
 ## Libraries and References
