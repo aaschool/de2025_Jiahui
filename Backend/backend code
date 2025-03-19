@@ -1,1 +1,102 @@
+package com.library.seatbooking;
 
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.data.jpa.repository.JpaRepository;
+import jakarta.persistence.*;
+import java.util.List;
+import java.util.Optional;
+
+@SpringBootApplication
+public class SeatBookingApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(SeatBookingApplication.class, args);
+    }
+}
+
+// User Model
+@Entity
+@Table(name = "users")
+class User {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String email;
+    private String password;
+    public User() {}
+    public User(String email, String password) { this.email = email; this.password = password; }
+    public String getEmail() { return email; }
+    public String getPassword() { return password; }
+}
+
+// Seat Model
+@Entity
+@Table(name = "seats")
+class Seat {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private boolean available;
+    public Seat() {}
+    public Seat(boolean available) { this.available = available; }
+    public boolean isAvailable() { return available; }
+    public void setAvailable(boolean available) { this.available = available; }
+}
+
+// Repositories
+interface UserRepository extends JpaRepository<User, Long> {
+    User findByEmail(String email);
+}
+interface SeatRepository extends JpaRepository<Seat, Long> {
+    List<Seat> findByAvailable(boolean available);
+}
+
+// Services
+@Service
+class UserService {
+    @Autowired private UserRepository userRepository;
+    public boolean authenticate(String email, String password) {
+        User user = userRepository.findByEmail(email);
+        return user != null && user.getPassword().equals(password);
+    }
+}
+
+@Service
+class SeatService {
+    @Autowired private SeatRepository seatRepository;
+    public List<Seat> getAvailableSeats() { return seatRepository.findByAvailable(true); }
+    public boolean bookSeat(Long seatId) {
+        Optional<Seat> seatOptional = seatRepository.findById(seatId);
+        if (seatOptional.isPresent() && seatOptional.get().isAvailable()) {
+            Seat seat = seatOptional.get();
+            seat.setAvailable(false);
+            seatRepository.save(seat);
+            return true;
+        }
+        return false;
+    }
+}
+
+// Controllers
+@RestController
+@RequestMapping("/api/users")
+class UserController {
+    @Autowired private UserService userService;
+    @PostMapping("/login")
+    public boolean login(@RequestParam String email, @RequestParam String password) {
+        return userService.authenticate(email, password);
+    }
+}
+
+@RestController
+@RequestMapping("/api/seats")
+class SeatController {
+    @Autowired private SeatService seatService;
+    @GetMapping("/available")
+    public List<Seat> getAvailableSeats() { return seatService.getAvailableSeats(); }
+    @PostMapping("/book/{id}")
+    public String bookSeat(@PathVariable Long id) {
+        return seatService.bookSeat(id) ? "Seat booked successfully!" : "Seat is not available!";
+    }
+}
