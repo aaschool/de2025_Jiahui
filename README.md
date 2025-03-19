@@ -40,6 +40,7 @@ Students book a seat via a React Native mobile app, selecting a time slot first,
 - https://github.com/wix/react-native-calendars
 - https://github.com/18harsh/Movie-Reservation-System
 - https://github.com/hemantjayas03/seatBookingApp
+- https://github.com/MentorUsama/ReactNativeTicketBooking
 - https://github.com/julioalcantara/booking-system
 - https://github.com/SunSet1219/Company-workspace-React-Native-
 - https://github.com/chandanlog/EVENT-BOOKING-SYSTEM
