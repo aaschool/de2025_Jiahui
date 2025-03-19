@@ -37,6 +37,22 @@ Students book a seat via a React Native mobile app, selecting a time slot first,
 
 * **Cron** - Cancel the reservation If no check-in after 15 minutes by RFID Reader
 
+  
+## System Workflow
+* **User Login**: The student logs into the app using their AA account credentials, and the backend verifies them.
+  
+* **Time Slot** Selection: The student selects a preferred study time slot in the app.
+  
+* **Seat Selection**: The student chooses an available seat from the seat map, and the backend books it.
+  
+* **Booking Confirmation**: The student confirms the booking, and the backend records the seat reservation with a timestamp.
+  
+* **RFID Check-in**: The student checks in by scanning their RFID card, and the Raspberry Pi sends the check-in data to the backend.
+  
+* **Auto-Cancellation**: If no check-in happens within 15 minutes, the backend automatically releases the booked seat.
+  
+* **View/Manage Bookings**: The student can view or modify their bookings from the app.
+
 
 ## Libraries and References
 - https://github.com/wix/react-native-calendars
