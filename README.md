@@ -29,7 +29,7 @@ Students book a seat via a React Native mobile app, selecting a time slot first,
 
 * **WebSocket** – Real-time seat updates
 
-* **Arduino** – For connects to RFID reader for processing check-in data
+* **Raspberry Pi** – For connects to RFID reader for processing check-in data
 
 * **Node.js** - Handles API requests and responses.
 
