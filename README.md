@@ -35,12 +35,11 @@ Students book a seat via a React Native mobile app, selecting a time slot first,
 
 * **Rest API** - handle user authentication, manage seat reservations, and facilitate communication between the frontend and backend.
 
-```
-code
-```
-1. one
-2. two
 
-
-* bullets
-* 
+## Libraries and References
+- https://github.com/wix/react-native-calendars
+- https://github.com/18harsh/Movie-Reservation-System
+- https://github.com/hemantjayas03/seatBookingApp
+- https://github.com/julioalcantara/booking-system
+- https://github.com/SunSet1219/Company-workspace-React-Native-
+- https://github.com/chandanlog/EVENT-BOOKING-SYSTEM
